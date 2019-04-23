@@ -1,0 +1,57 @@
+//
+//  URLRequestError.swift
+//  URLBuilder
+//
+//  Created by Eduardo Sanches Bocato on 23/04/19.
+//  Copyright © 2019 Eduardo Sanches Bocato. All rights reserved.
+//
+
+import Foundation
+
+private let domain = "URLRequestError"
+
+
+/// Defines URLRequestErrors
+///
+/// - raw: and error comming from the system, that conforms with Error
+/// - unknown: unknown error
+/// - invalidURL: an invalid URL was provided
+public enum URLRequestError: Error {
+    
+    case raw(Error)
+    case unknown
+    case requestBuilderFailed
+    case withData(Data, Error?)
+    
+    public var code: Int {
+        switch self {
+        case .raw(let error):
+            let nsError = error as NSError
+            return nsError.code
+        case .unknown:
+            return -1
+        case .requestBuilderFailed:
+            return -2
+        case .withData(_, let error):
+            let nsError = error as NSError?
+            return nsError?.code ?? -3
+        }
+    }
+    
+    public var rawError: NSError {
+        switch self {
+        case .raw(let error):
+            return error as NSError
+        case .unknown:
+            return NSError(domain: domain, code: code, description: "Unknown error.")
+        case .requestBuilderFailed:
+            return NSError(domain: domain, code: code, description: "The request builder failed.")
+        case .withData(let data, _):
+            guard let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []), let userInfo = jsonObject as? [String: Any] else {
+                return URLRequestError.unknown.rawError
+            }
+            return NSError(domain: domain, code: code, userInfo: userInfo)
+        }
+    }
+    
+}
