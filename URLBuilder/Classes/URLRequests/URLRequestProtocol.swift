@@ -22,7 +22,7 @@ public protocol URLRequestProtocol {
     
     /// Those are the parameters we want to pass with the request
     /// they can be used for the body or the URL
-    var parameters: URLRequestParameters { get }
+    var parameters: URLRequestParameters? { get }
     
     /// Defines the list of headers we want to be passed along with each request
     var headers: [String: Any]? { get }
