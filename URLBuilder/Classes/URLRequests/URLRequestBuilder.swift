@@ -132,9 +132,13 @@ public class URLRequestBuilder {
                 let payload = try? JSONSerialization.data(withJSONObject: bodyParameters, options: []) else { return }
             request.httpBody = payload
         case .url(let urlParameters):
-            guard let urlParameters = urlParameters else { return }
-            let queryParameters = URLUtil().escapedParameters(urlParameters)
-            request.url?.appendPathComponent(queryParameters)
+            
+            guard let urlParameters = urlParameters,
+                let url = request.url,
+                var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true) else { return }
+            
+            urlComponents.queryItems = urlParameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+            request.url = urlComponents.url
         }
         
     }
